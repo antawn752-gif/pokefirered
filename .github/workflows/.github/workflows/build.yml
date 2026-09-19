@@ -8,27 +8,26 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: devkitpro/devkitarm:latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install System Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-arm-none-eabi libpng-dev build-essential
+          apt-get update
+          apt-get install -y libpng-dev build-essential curl
 
       - name: Download ROM base
         run: |
-          # The compiler needs a clean base to pull graphics assets
-          # This downloads a verified clean copy of FireRed (U)(Squirrels)
           curl -L -o rom.gba "https://archive.org"
 
       - name: Compile game
-        run: make -j$(nproc)
-
+        run: |
+          make -j$(nproc)
+          
       - name: Upload finished ZIP artifact
         uses: actions/upload-artifact@v4
         with:
           name: Pokemon-FireRed-Custom
           path: pokefirered.gba
-
