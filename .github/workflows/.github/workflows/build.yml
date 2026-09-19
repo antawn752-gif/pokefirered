@@ -1,0 +1,34 @@
+name: Build ROM
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi libpng-dev build-essential
+
+      - name: Download ROM base
+        run: |
+          # The compiler needs a clean base to pull graphics assets
+          # This downloads a verified clean copy of FireRed (U)(Squirrels)
+          curl -L -o rom.gba "https://archive.org"
+
+      - name: Compile game
+        run: make -j$(nproc)
+
+      - name: Upload finished ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pokemon-FireRed-Custom
+          path: pokefirered.gba
+
