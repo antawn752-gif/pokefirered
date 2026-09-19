@@ -7,11 +7,24 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container: devkitpro/devkitarm:latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install Build Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpng-dev build-essential curl git gd-map gcc-arm-none-eabi
+
+      - name: Install agbcc
+        run: |
+          # The game code relies on an older internal compiler called agbcc
+          git clone https://github.com
+          cd agbcc
+          ./build.sh
+          ./install.sh ../
+          cd ..
 
       - name: Download ROM base
         run: |
