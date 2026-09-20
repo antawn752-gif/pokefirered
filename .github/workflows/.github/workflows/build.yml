@@ -7,28 +7,22 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+    container: ghcr.io/pret/pokefirered-build:latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Build Tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libpng-dev build-essential curl git gd-map gcc-arm-none-eabi
-
-      - name: Install agbcc
-        run: |
-          # The game code relies on an older internal compiler called agbcc
-          git clone https://github.com
-          cd agbcc
-          ./build.sh
-          ./install.sh ../
-          cd ..
-
       - name: Download ROM base
         run: |
           curl -L -o rom.gba "https://archive.org"
+
+      - name: Build Tools
+        run: |
+          make -C tools/gflib
+          make -C tools/scaninc
+          make -C tools/preproc
+          make -C tools/gbagfx
 
       - name: Compile game
         run: |
