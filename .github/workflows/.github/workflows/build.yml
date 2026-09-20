@@ -7,28 +7,42 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container: ghcr.io/pret/pokefirered-build:latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download ROM base
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpng-dev libfreetype6-dev curl git gcc-arm-none-eabi
+
+      - name: Setup Compiler
+        run: |
+          # Download and install the exact internal compiler required by pret
+          git clone https://github.com
+          cd agbcc
+          ./build.sh
+          ./install.sh ../
+          cd ..
+
+      - name: Download Clean Base Assets
         run: |
           curl -L -o rom.gba "https://archive.org"
 
-      - name: Build Tools
+      - name: Build Toolchain Utilities
         run: |
           make -C tools/gflib
           make -C tools/scaninc
           make -C tools/preproc
           make -C tools/gbagfx
 
-      - name: Compile game
+      - name: Compile Game ROM
         run: |
+          make clean
           make -j$(nproc)
           
-      - name: Upload finished ZIP artifact
+      - name: Upload Finished ZIP
         uses: actions/upload-artifact@v4
         with:
           name: Pokemon-FireRed-Custom
